@@ -1,0 +1,3 @@
+{"id":"intro","text":"BETTER-RAG builds local indexes and returns cited grounded answers. Every accepted answer includes supporting citations.","metadata":{"source":"example","topic":"intro"}}
+{"id":"guards","text":"When retrieval evidence is weak, BETTER-RAG refuses instead of guessing. The refusal includes guard violations so developers can inspect what happened.","metadata":{"source":"example","topic":"guardrails"}}
+{"id":"retrieval","text":"BETTER-RAG combines sparse term vectors, BM25-style scoring, and MMR reranking to retrieve useful context without external services.","metadata":{"source":"example","topic":"retrieval"}}

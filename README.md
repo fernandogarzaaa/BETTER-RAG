@@ -58,7 +58,7 @@ better-rag search .better-rag-index.json "grounded answers" --json
 ```python
 from better_rag import BetterRAG, Document, RagConfig
 
-rag = BetterRAG(RagConfig(min_score=0.2, max_risk=0.7))
+rag = BetterRAG(RagConfig(min_score=0.35, max_risk=0.5))
 rag.add_documents([
     Document(
         id="intro",

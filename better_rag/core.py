@@ -30,8 +30,8 @@ class RagConfig:
     chunk_size: int = 120
     chunk_overlap: int = 24
     top_k: int = 4
-    min_score: float = 0.22
-    max_risk: float = 0.7
+    min_score: float = 0.35
+    max_risk: float = 0.5
     mmr_lambda: float = 0.75
 
     def validate(self) -> None:

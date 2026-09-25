@@ -82,3 +82,31 @@ def test_from_jsonl_accepts_utf8_bom(tmp_path):
     result = rag.ask("Should BOM files load?")
 
     assert result.passed is True
+
+
+def test_default_config_refuses_unrelated_question():
+    """Regression: defaults must refuse weak evidence, not stitch garbage answers.
+
+    Previously min_score=0.22/max_risk=0.7 let an unrelated question
+    ("favorite ice cream flavor") pass with content stitched from
+    unrelated GPU/hardware docs. Defaults are now 0.35/0.5.
+    """
+    rag = BetterRAG()  # default config
+    rag.add_documents(
+        [
+            Document(
+                id="gpu",
+                text="GPU inference uses CUDA cores and tensor cores for matrix multiplication.",
+            ),
+            Document(
+                id="rag",
+                text="Better RAG grounds answers in retrieved evidence with citations.",
+            ),
+        ]
+    )
+
+    result = rag.ask("What is my favorite ice cream flavor?")
+
+    assert result.passed is False
+    assert "not enough evidence" in result.answer.lower()
+    assert result.citations == []

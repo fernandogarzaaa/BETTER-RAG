@@ -14,10 +14,6 @@ It runs with the Python standard library only.
 
 ## Install
 
-```bash
-pip install better-rag
-```
-
 From source:
 
 ```bash
@@ -25,6 +21,11 @@ git clone https://github.com/fernandogarzaaa/BETTER-RAG
 cd BETTER-RAG
 python -m pip install -e ".[dev]"
 ```
+
+A PyPI release (`pip install better-rag`) is pending: the repo ships a
+trusted-publishing workflow (`.github/workflows/publish.yml`) that publishes
+to PyPI on version tags (`v*`), so the first tagged release will land on PyPI
+with no further changes. Until then, install from source as above.
 
 ## Quick Start
 

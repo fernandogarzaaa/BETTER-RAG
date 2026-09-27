@@ -110,3 +110,43 @@ def test_default_config_refuses_unrelated_question():
     assert result.passed is False
     assert "not enough evidence" in result.answer.lower()
     assert result.citations == []
+
+
+def test_preview_chars_truncates_citation_text():
+    rag = BetterRAG()
+    long_text = "word " * 200  # 1000 chars
+    rag.add_documents([Document(id="long", text=long_text.strip())])
+    result = rag.ask("word")
+    assert result.passed is True
+    full = result.to_dict()
+    full_len = len(full["citations"][0]["text"])
+    assert full_len > 50  # chunked text longer than the preview window
+    preview = result.to_dict(preview_chars=50)
+    text = preview["citations"][0]["text"]
+    assert len(text) < full_len
+    assert text.startswith("word word")
+    assert f"preview of {full_len} chars" in text
+
+
+def test_preview_chars_none_is_full_text():
+    rag = BetterRAG()
+    rag.add_documents([Document(id="d", text="short text here")])
+    hits = rag.search("short text")
+    assert hits[0].to_dict()["text"] == hits[0].to_dict(preview_chars=None)["text"]
+
+
+def test_preview_chars_short_text_untouched():
+    rag = BetterRAG()
+    rag.add_documents([Document(id="d", text="tiny")])
+    hits = rag.search("tiny")
+    assert hits[0].to_dict(preview_chars=500)["text"] == "tiny"
+
+
+def test_preview_chars_rejects_non_positive():
+    rag = BetterRAG()
+    rag.add_documents([Document(id="d", text="some text here")])
+    hits = rag.search("some text")
+    with pytest.raises(ValueError):
+        hits[0].to_dict(preview_chars=0)
+    with pytest.raises(ValueError):
+        hits[0].to_dict(preview_chars=-10)

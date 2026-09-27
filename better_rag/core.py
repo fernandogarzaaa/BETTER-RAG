@@ -61,6 +61,16 @@ class _Chunk:
     vector: dict[str, float]
 
 
+def _preview_text(text: str, preview_chars: int | None) -> str:
+    if preview_chars is None:
+        return text
+    if preview_chars <= 0:
+        raise ValueError("preview_chars must be positive")
+    if len(text) <= preview_chars:
+        return text
+    return text[:preview_chars] + f"… [preview of {len(text)} chars]"
+
+
 @dataclass(frozen=True)
 class SearchHit:
     document_id: str
@@ -69,11 +79,11 @@ class SearchHit:
     score: float
     metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, preview_chars: int | None = None) -> dict[str, Any]:
         return {
             "document_id": self.document_id,
             "chunk_id": self.chunk_id,
-            "text": self.text,
+            "text": _preview_text(self.text, preview_chars),
             "score": round(self.score, 4),
             "metadata": self.metadata,
         }
@@ -87,12 +97,12 @@ class Citation:
     text: str
     metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, preview_chars: int | None = None) -> dict[str, Any]:
         return {
             "document_id": self.document_id,
             "chunk_id": self.chunk_id,
             "score": round(self.score, 4),
-            "text": self.text,
+            "text": _preview_text(self.text, preview_chars),
             "metadata": self.metadata,
         }
 
@@ -106,12 +116,12 @@ class RagResult:
     violations: list[str] = field(default_factory=list)
     trace: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, preview_chars: int | None = None) -> dict[str, Any]:
         return {
             "answer": self.answer,
             "passed": self.passed,
             "confidence": round(self.confidence, 4),
-            "citations": [citation.to_dict() for citation in self.citations],
+            "citations": [citation.to_dict(preview_chars=preview_chars) for citation in self.citations],
             "violations": list(self.violations),
             "trace": list(self.trace),
         }

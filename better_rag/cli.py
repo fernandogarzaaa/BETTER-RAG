@@ -26,6 +26,8 @@ def build_parser() -> argparse.ArgumentParser:
     search.add_argument("query", help="Search query")
     search.add_argument("--top-k", type=int, default=None, help="Number of hits")
     search.add_argument("--json", action="store_true", help="Emit JSON")
+    search.add_argument("--preview-chars", type=int, default=None,
+                        help="Truncate hit text in JSON output to N chars (compact previews)")
 
     ask = sub.add_parser("ask", help="Ask a grounded question")
     ask.add_argument("index", help="Index JSON path")
@@ -34,6 +36,8 @@ def build_parser() -> argparse.ArgumentParser:
     ask.add_argument("--min-score", type=float, default=None, help="Override minimum grounding score")
     ask.add_argument("--max-risk", type=float, default=None, help="Override guard risk budget")
     ask.add_argument("--json", action="store_true", help="Emit JSON")
+    ask.add_argument("--preview-chars", type=int, default=None,
+                     help="Truncate citation text in JSON output to N chars (compact previews)")
 
     return parser
 
@@ -76,7 +80,7 @@ def _cmd_search(args: argparse.Namespace) -> int:
     rag = BetterRAG.load(args.index)
     hits = rag.search(args.query, top_k=args.top_k)
     if args.json:
-        print(json.dumps([hit.to_dict() for hit in hits], indent=2))
+        print(json.dumps([hit.to_dict(preview_chars=args.preview_chars) for hit in hits], indent=2))
     else:
         for hit in hits:
             print(f"{hit.document_id} {hit.chunk_id} score={hit.score:.3f}\n{hit.text}\n")
@@ -94,7 +98,7 @@ def _cmd_ask(args: argparse.Namespace) -> int:
         rag.config.validate()
     result = rag.ask(args.query, top_k=args.top_k)
     if args.json:
-        print(json.dumps(result.to_dict(), indent=2))
+        print(json.dumps(result.to_dict(preview_chars=args.preview_chars), indent=2))
     else:
         print(result.answer)
         print(f"\nconfidence={result.confidence:.3f} passed={result.passed}")

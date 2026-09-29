@@ -54,6 +54,15 @@ Search without answer synthesis:
 better-rag search .better-rag-index.json "grounded answers" --json
 ```
 
+For compact JSON output, `search` and `ask` accept `--preview-chars N`,
+which truncates hit and citation text to N characters (N must be positive).
+Shorter texts are left untouched; truncated text ends with a note like
+`… [preview of 1200 chars]` so the full length stays visible:
+
+```bash
+better-rag search .better-rag-index.json "grounded answers" --json --preview-chars 200
+```
+
 ## Python API
 
 ```python

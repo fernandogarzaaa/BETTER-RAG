@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added `--preview-chars N` to the `search` and `ask` CLI commands: truncates
+  hit and citation text in JSON output to N characters for compact previews
+  (N must be positive; truncated text notes its full length).
 - Tightened guardrail defaults: `min_score` 0.22 to 0.35, `max_risk` 0.7
   to 0.5. The previous defaults let unrelated questions pass with stitched
   answers; the new defaults refuse properly while real questions still

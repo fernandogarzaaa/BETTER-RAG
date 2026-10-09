@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- CI now runs ruff (lint) and mypy (strict type check); added `uv.lock`
+  and weekly Dependabot updates for Python deps and GitHub Actions.
 - Added `--preview-chars N` to the `search` and `ask` CLI commands: truncates
   hit and citation text in JSON output to N characters for compact previews
   (N must be positive; truncated text notes its full length).

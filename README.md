@@ -19,7 +19,19 @@ From source:
 ```bash
 git clone https://github.com/fernandogarzaaa/BETTER-RAG
 cd BETTER-RAG
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 python -m pip install -e ".[dev]"
+```
+
+Use a virtual environment: on Debian/Ubuntu systems, installing into the
+system Python is blocked (`externally-managed-environment`), so the venv
+above is required, not optional.
+
+You can also run the CLI without installing, straight from the source tree:
+
+```bash
+PYTHONPATH=. python3 -m better_rag --help
 ```
 
 A PyPI release (`pip install better-rag`) is pending: the repo ships a
@@ -72,7 +84,7 @@ rag = BetterRAG(RagConfig(min_score=0.35, max_risk=0.5))
 rag.add_documents([
     Document(
         id="intro",
-        text="BETTER-RAG grounds answers in retrieved evidence and returns citations.",
+        text="BETTER-RAG returns grounded answers with citations from retrieved evidence.",
         metadata={"source": "docs"},
     )
 ])
@@ -81,6 +93,9 @@ result = rag.ask("How are answers grounded?")
 print(result.answer)
 print(result.citations)
 ```
+
+Note: retrieval is exact-term based (no stemming), so the query and the
+documents must share the same word forms for the example above to pass.
 
 ## Corpus Format
 
@@ -102,9 +117,19 @@ BETTER-RAG rejects answers when:
 
 The default guardrails are intentionally conservative and transparent. They are not a substitute for a full policy engine, but they keep the baseline from silently fabricating unsupported answers.
 
+Fail-closed citation behavior: when an answer is blocked by the unsafe-content
+guardrail, the citations keep their document ids, chunk ids, scores, and
+metadata, but the flagged citation *text* is redacted (empty string). Blocked
+evidence is never shipped back inside the response.
+
+Forbidden-term matching is word-boundary aware: "hack" fires on the word
+"hack", not inside larger words like "shackles".
+
 ## Development
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 python -m pip install -e ".[dev]"
 python -m pytest
 python -m build

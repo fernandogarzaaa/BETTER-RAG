@@ -210,23 +210,29 @@ class BetterRAG:
         unsafe = _safety_violations(answer)
         violations.extend(unsafe)
         passed = not violations
+        safety_blocked = bool(unsafe)
         citations = [
             Citation(
                 document_id=hit.document_id,
                 chunk_id=hit.chunk_id,
                 score=hit.score,
-                text=hit.text,
+                # Fail closed: never ship the flagged text of a safety-blocked
+                # answer inside citations. Ids, scores, and metadata survive so
+                # the block stays attributable and debuggable.
+                text="" if safety_blocked else hit.text,
                 metadata=hit.metadata,
             )
             for hit in grounded
         ]
         trace.append(f"confidence={confidence:.4f}")
+        if safety_blocked:
+            trace.append("citation text redacted (safety)")
         trace.append("guard passed" if passed else "guard failed")
         return RagResult(
             answer=answer if passed else "Retrieved evidence was blocked by safety guards.",
             passed=passed,
             confidence=confidence,
-            citations=citations if passed else citations,
+            citations=citations,
             violations=violations,
             trace=trace,
         )
@@ -391,4 +397,8 @@ def _mmr_select(scored: list[tuple[float, _Chunk]], top_k: int, lambda_: float) 
 
 def _safety_violations(text: str) -> list[str]:
     lower = text.lower()
-    return [f"Forbidden content '{term}'" for term in sorted(_FORBIDDEN) if term in lower]
+    return [
+        f"Forbidden content '{term}'"
+        for term in sorted(_FORBIDDEN)
+        if re.search(r"\b" + re.escape(term) + r"\b", lower)
+    ]

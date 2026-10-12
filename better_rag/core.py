@@ -143,6 +143,10 @@ class BetterRAG:
             raise ValueError("at least one document is required")
         for doc in docs:
             _validate_document(doc)
+            if doc.id in self._documents:
+                # Re-adding an id replaces the document: drop its old chunks so
+                # stale text is no longer searchable or citable.
+                self._chunks = [chunk for chunk in self._chunks if chunk.document_id != doc.id]
             self._documents[doc.id] = doc
             for chunk_id, text in _chunk_text(doc.id, doc.text, self.config.chunk_size, self.config.chunk_overlap):
                 tokens = _tokens(text)

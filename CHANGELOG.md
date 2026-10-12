@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixed: re-adding a document with an existing id now removes its old chunks,
+  so stale text is no longer returned by `search` or cited by `ask`.
 - CI now runs ruff (lint) and mypy (strict type check); added `uv.lock`
   and weekly Dependabot updates for Python deps and GitHub Actions.
 - Added `--preview-chars N` to the `search` and `ask` CLI commands: truncates

@@ -150,3 +150,43 @@ def test_preview_chars_rejects_non_positive():
         hits[0].to_dict(preview_chars=0)
     with pytest.raises(ValueError):
         hits[0].to_dict(preview_chars=-10)
+
+
+def test_re_adding_a_document_replaces_its_chunks():
+    rag = BetterRAG(RagConfig(chunk_size=20))
+    rag.add_documents(
+        [
+            Document(id="a", text="The launch code is zebra. Zebras live in Africa."),
+            Document(id="b", text="Weather reports include temperature and rainfall."),
+        ]
+    )
+    rag.add_documents([Document(id="a", text="The launch code was rotated to falcon.")])
+
+    texts = [hit.text for hit in rag.search("launch code zebra", top_k=10)]
+
+    assert not any("zebra" in text.lower() for text in texts)
+    assert any("falcon" in text for text in texts)
+    assert sum(1 for chunk in rag._chunks if chunk.document_id == "a") == 1
+    # The unrelated document is untouched.
+    assert any(chunk.document_id == "b" for chunk in rag._chunks)
+    assert rag._doc_freq.get("zebra", 0) == 0
+    assert rag._doc_freq.get("falcon") == 1
+
+
+def test_duplicate_id_within_one_batch_keeps_the_last_version():
+    rag = BetterRAG()
+    rag.add_documents(
+        [
+            Document(id="a", text="Old policy allows refunds within 90 days."),
+            Document(id="a", text="New policy allows refunds within 30 days."),
+        ]
+    )
+
+    texts = [hit.text for hit in rag.search("refund policy days", top_k=10)]
+
+    assert texts and all("30 days" in text for text in texts)
+
+
+def test_add_documents_rejects_an_empty_batch():
+    with pytest.raises(ValueError, match="at least one document"):
+        BetterRAG().add_documents([])

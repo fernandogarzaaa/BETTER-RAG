@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Fixed: `add_documents` validates the whole batch before changing the index;
+  an invalid document no longer leaves the index half-updated (old chunks of a
+  re-added id dropped while document-frequency stats went stale).
+- Fixed: `search`/`ask` reject `top_k` values that are not positive integers
+  (`0` used to silently mean "default" and `-1` returned no hits, so `ask`
+  wrongly reported "not enough evidence"). The CLI prints a clean error.
+- Performance: BM25 average document length is computed once per query
+  instead of once per chunk (search was O(N^2) in chunk count; about 13x
+  faster at 3,000 chunks).
 - Fixed: re-adding a document with an existing id now removes its old chunks,
   so stale text is no longer returned by `search` or cited by `ask`.
 - CI now runs ruff (lint) and mypy (strict type check); added `uv.lock`

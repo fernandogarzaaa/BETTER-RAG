@@ -190,3 +190,42 @@ def test_duplicate_id_within_one_batch_keeps_the_last_version():
 def test_add_documents_rejects_an_empty_batch():
     with pytest.raises(ValueError, match="at least one document"):
         BetterRAG().add_documents([])
+
+
+def test_invalid_document_in_batch_leaves_index_unchanged():
+    rag = BetterRAG()
+    rag.add_documents([{"id": "a", "text": "alpha beta gamma"}])
+    before = ([c.text for c in rag._chunks], dict(rag._doc_freq), list(rag._documents))
+    with pytest.raises(ValueError):
+        rag.add_documents([{"id": "a", "text": "delta epsilon"}, {"id": "b", "text": "  "}])
+    assert ([c.text for c in rag._chunks], dict(rag._doc_freq), list(rag._documents)) == before
+    assert rag.search("alpha")[0].document_id == "a"
+
+
+@pytest.mark.parametrize("bad", [0, -1, True, 2.5])
+def test_search_rejects_non_positive_top_k(bad):
+    rag = BetterRAG()
+    rag.add_documents([{"id": "a", "text": "alpha beta gamma"}])
+    with pytest.raises(ValueError, match="top_k"):
+        rag.search("alpha", top_k=bad)
+    with pytest.raises(ValueError, match="top_k"):
+        rag.ask("alpha", top_k=bad)
+
+
+def test_search_top_k_none_uses_config_default():
+    rag = BetterRAG(RagConfig(top_k=2))
+    rag.add_documents([{"id": str(i), "text": f"shared term number {i}"} for i in range(5)])
+    assert len(rag.search("shared term")) == 2
+    assert len(rag.search("shared term", top_k=3)) == 3
+
+
+def test_bm25_precomputed_avgdl_matches_per_chunk_value():
+    rag = BetterRAG()
+    rag.add_documents([
+        {"id": "a", "text": "alpha beta gamma delta"},
+        {"id": "b", "text": "alpha alpha epsilon"},
+        {"id": "c", "text": "zeta eta theta iota kappa lambda"},
+    ])
+    avgdl = sum(len(c.tokens) for c in rag._chunks) / len(rag._chunks)
+    for chunk in rag._chunks:
+        assert rag._bm25(["alpha"], chunk.tokens, avgdl) == rag._bm25(["alpha"], chunk.tokens)

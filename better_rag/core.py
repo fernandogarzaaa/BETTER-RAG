@@ -141,8 +141,11 @@ class BetterRAG:
         docs = [_coerce_document(item) for item in documents]
         if not docs:
             raise ValueError("at least one document is required")
+        # Validate the whole batch before touching the index so a bad document
+        # cannot leave it half-updated (old chunks dropped, doc_freq stale).
         for doc in docs:
             _validate_document(doc)
+        for doc in docs:
             if doc.id in self._documents:
                 # Re-adding an id replaces the document: drop its old chunks so
                 # stale text is no longer searchable or citable.
@@ -168,12 +171,20 @@ class BetterRAG:
             raise ValueError("query must contain searchable terms")
         if not self._chunks:
             raise ValueError("index is empty")
-        k = top_k or self.config.top_k
+        if top_k is None:
+            k = self.config.top_k
+        elif isinstance(top_k, bool) or not isinstance(top_k, int) or top_k <= 0:
+            raise ValueError("top_k must be a positive integer")
+        else:
+            k = top_k
         query_vector = _term_vector(query_tokens)
+        # Corpus statistics are constant for the whole query: compute once
+        # instead of once per chunk (was O(N^2) in chunk count).
+        avgdl = sum(len(chunk.tokens) for chunk in self._chunks) / len(self._chunks)
         scored = []
         for chunk in self._chunks:
             vector_score = _cosine_sparse(query_vector, chunk.vector)
-            bm25_score = self._bm25(query_tokens, chunk.tokens)
+            bm25_score = self._bm25(query_tokens, chunk.tokens, avgdl)
             lexical_overlap = _overlap(query_tokens, chunk.tokens)
             score = (0.48 * vector_score) + (0.37 * bm25_score) + (0.15 * lexical_overlap)
             scored.append((score, chunk))
@@ -277,11 +288,12 @@ class BetterRAG:
             for token in set(chunk.tokens):
                 self._doc_freq[token] = self._doc_freq.get(token, 0) + 1
 
-    def _bm25(self, query_tokens: list[str], chunk_tokens: list[str]) -> float:
+    def _bm25(self, query_tokens: list[str], chunk_tokens: list[str], avgdl: float | None = None) -> float:
         if not chunk_tokens:
             return 0.0
         n = max(len(self._chunks), 1)
-        avgdl = sum(len(chunk.tokens) for chunk in self._chunks) / n
+        if avgdl is None:
+            avgdl = sum(len(chunk.tokens) for chunk in self._chunks) / n
         k1 = 1.5
         b = 0.75
         score = 0.0

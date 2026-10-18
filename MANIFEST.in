@@ -1,5 +1,6 @@
 include CHANGELOG.md
 include CONTRIBUTING.md
 include SECURITY.md
+include better_rag/py.typed
 recursive-include examples *.jsonl
 recursive-include tests *.py

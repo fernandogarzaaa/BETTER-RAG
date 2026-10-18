@@ -39,6 +39,9 @@ testpaths = ["tests"]
 [tool.setuptools.packages.find]
 include = ["better_rag*"]
 
+[tool.setuptools.package-data]
+better_rag = ["py.typed"]
+
 [tool.ruff]
 target-version = "py311"
 

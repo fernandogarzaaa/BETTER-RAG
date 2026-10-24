@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Added: raw conversation history example (`examples/conversation_history.jsonl`
+  and `examples/raw_conversation_history.py`) with tests in
+  `tests/test_raw_conversation_history.py`. Each turn is indexed verbatim, with
+  no summarization or fact extraction, as a dependency-free analogue of the
+  Raw-RAG baseline in Bao et al., arXiv:2610.30755. No new dependencies.
+  README documents the analogue honestly: no paper benchmark score is claimed
+  for BETTER-RAG, which uses BM25-style scoring, cosine term vectors, and
+  MMR reranking, not dense retrieval, a cross-encoder reranker, or a reader LLM.
 - Fixed: `add_documents` validates the whole batch before changing the index;
   an invalid document no longer leaves the index half-updated (old chunks of a
   re-added id dropped while document-frequency stats went stale).

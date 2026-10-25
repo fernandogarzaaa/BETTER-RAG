@@ -34,10 +34,13 @@ You can also run the CLI without installing, straight from the source tree:
 PYTHONPATH=. python3 -m better_rag --help
 ```
 
-A PyPI release (`pip install better-rag`) is pending: the repo ships a
-trusted-publishing workflow (`.github/workflows/publish.yml`) that publishes
-to PyPI on version tags (`v*`), so the first tagged release will land on PyPI
-with no further changes. Until then, install from source as above.
+No PyPI release exists yet, so `pip install better-rag` does not work
+today. The v0.1.0 tag did not publish to PyPI. That tag points to the
+2026-04-30 release commit, and the publish workflow
+(`.github/workflows/publish.yml`) was only added on 2026-09-26, so no
+publish run ever triggered for v0.1.0. PyPI still returns 404 for
+better-rag. A future release needs a new tag and a configured PyPI
+trusted publisher for this repo. Until then, install from source as above.
 
 ## Quick Start
 

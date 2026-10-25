@@ -128,6 +128,41 @@ evidence is never shipped back inside the response.
 Forbidden-term matching is word-boundary aware: "hack" fires on the word
 "hack", not inside larger words like "shackles".
 
+## Raw conversation history
+
+BETTER-RAG can index a conversation turn by turn, verbatim, with no
+summarization and no fact extraction. Each turn stays a separate document,
+so a later question can retrieve the original wording, the relations
+between turns, and the dependency path behind an answer, instead of a
+rewritten summary that may have dropped those details.
+
+This is the dependency-free analogue of the Raw-RAG baseline in Bao and
+others, "Is Complex Agentic Memory Always Needed? Naive RAG Is Stronger
+Than We Thought" (arXiv:2610.30755). That paper reports raw retrieval
+plus reranking over raw history ranking first in six of seven
+benchmark-model settings across LoCoMo, LongMemEval, MEME, and
+MemoryAgentBench, and BEAM-1M ingestion in 0.3 hours versus 3.2 to 27
+hours for the compared agentic memory systems.
+
+It is an analogue, not a reproduction. The paper uses dense retrieval, a
+cross-encoder reranker, and a reader LLM. BETTER-RAG uses BM25-style
+scoring, cosine term vectors, and MMR reranking, and returns extractive
+answers with citations. No benchmark score from the paper is claimed for
+BETTER-RAG itself.
+
+Run the example from the repo root:
+
+```bash
+PYTHONPATH=. python3 examples/raw_conversation_history.py
+```
+
+Or build the conversation corpus with the CLI and ask it directly:
+
+```bash
+better-rag build examples/conversation_history.jsonl --out .conversation-index.json
+better-rag ask .conversation-index.json "When is the hotel check-in and late checkout?" --json
+```
+
 ## Development
 
 ```bash

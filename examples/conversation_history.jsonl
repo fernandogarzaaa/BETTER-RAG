@@ -1,0 +1,8 @@
+{"id":"turn-01","text":"User: I am planning a trip to Kyoto in April. I prefer trains over flights, and I want to stay near Gion.","metadata":{"source":"conversation","speaker":"user","turn":1}}
+{"id":"turn-02","text":"Assistant: Kyoto in April is a good choice for cherry blossoms. Trains from Osaka are frequent, and Gion is walkable.","metadata":{"source":"conversation","speaker":"assistant","turn":2}}
+{"id":"turn-03","text":"User: My hotel check-in is April 12, and I need a late checkout on April 15 because my train leaves in the evening.","metadata":{"source":"conversation","speaker":"user","turn":3}}
+{"id":"turn-04","text":"Assistant: I will note April 12 check-in and April 15 late checkout. The evening train gives you a full last day.","metadata":{"source":"conversation","speaker":"assistant","turn":4}}
+{"id":"turn-05","text":"User: I am allergic to peanuts, so please avoid restaurants that serve peanut sauce.","metadata":{"source":"conversation","speaker":"user","turn":5}}
+{"id":"turn-06","text":"Assistant: Noted, no peanut sauce. I will look for restaurants with clear allergy menus.","metadata":{"source":"conversation","speaker":"assistant","turn":6}}
+{"id":"turn-07","text":"User: My friend Maya is joining on April 13, and she is vegetarian.","metadata":{"source":"conversation","speaker":"user","turn":7}}
+{"id":"turn-08","text":"Assistant: Maya joining April 13, vegetarian meals noted.","metadata":{"source":"conversation","speaker":"assistant","turn":8}}
